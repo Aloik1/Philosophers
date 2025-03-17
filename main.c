@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/17 15:05:29 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/03/17 15:25:24 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,19 @@ void   *monitor_death(void *arg)
 		{
 			if (time_milliseconds(philo->start_time) - philo->philosophers[i].last_meal > philo->time_to_die)
 			{
-				printf("%zu %d died\n", time_milliseconds(philo->start_time), philo->philosophers[i].id);
-				exit (0);
+				if (philo->number_of_times_each_philosopher_must_eat != -1 && philo->philosophers[i].times_ate >= philo->number_of_times_each_philosopher_must_eat)
+				{
+					i++;
+					continue ;
+				}
+				else
+				{
+					printf("Time: %zu, Number %d died\n", time_milliseconds(philo->start_time), philo->philosophers[i].id);
+					exit (0);
+				}
 			}
 			i++;
 		}
-		usleep(100);
 	}
 	return NULL;
 }
@@ -57,17 +64,7 @@ void	*routine(void *arg)
 	while (1)
 	{
 		// Thinking
-		if ((philosophers->times_thought == philosophers->times_ate) && (philosophers->times_thought == philosophers->times_slept))
-		{
-			//printf("Philosopher %d did everything %d times\n", philosophers->id, philosophers->times_ate);
-			printf("Time: %lu, Number %d is thinking\n", time_milliseconds(philo->start_time), philosophers->id);
-			pthread_mutex_lock(&philosophers->mutex);
-			philosophers->times_thought++;
-			pthread_mutex_unlock(&philosophers->mutex);
-			usleep(200 * 1000);
-		}
-		// Eating
-		if (philosophers->times_ate < philosophers->times_thought || philosophers->times_ate < philosophers->times_slept)
+		if ((philosophers->times_ate == philosophers->times_thought) && (philosophers->times_ate == philosophers->times_slept))
 		{
 			if (left_fork < right_fork)
 			{
@@ -88,6 +85,15 @@ void	*routine(void *arg)
 			usleep(philo->time_to_eat * 1000);
 			pthread_mutex_unlock(&philo->forks[left_fork]);
 			pthread_mutex_unlock(&philo->forks[right_fork]);
+		}
+		// Eating
+		if (philosophers->times_thought < philosophers->times_ate || philosophers->times_thought < philosophers->times_slept)
+		{
+			printf("Time: %lu, Number %d is thinking\n", time_milliseconds(philo->start_time), philosophers->id);
+			pthread_mutex_lock(&philosophers->mutex);
+			philosophers->times_thought++;
+			pthread_mutex_unlock(&philosophers->mutex);
+			usleep(200);
 		}
 		if (philosophers->times_slept < philosophers->times_ate && philosophers->times_slept < philosophers->times_thought)
 		{
