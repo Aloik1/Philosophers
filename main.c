@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/17 16:06:02 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/03/17 20:09:28 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void   *monitor_death(void *arg)
 		i = 0;
 		while (i < philo->number_of_philosophers)
 		{
+			pthread_mutex_lock(&philo->philosophers[i].mutex);
 			if (time_milliseconds(philo->start_time) - philo->philosophers[i].last_meal > philo->time_to_die)
 			{
 				if (philo->number_of_times_each_philosopher_must_eat != -1 && philo->philosophers[i].times_ate >= philo->number_of_times_each_philosopher_must_eat)
@@ -40,9 +41,11 @@ void   *monitor_death(void *arg)
 				else
 				{
 					printf("Time: %zu, Number %d died\n", time_milliseconds(philo->start_time), philo->philosophers[i].id);
+					pthread_mutex_unlock(&philo->philosophers[i].mutex);
 					exit (0);
 				}
 			}
+			pthread_mutex_unlock(&philo->philosophers[i].mutex);
 			i++;
 		}
 	}
@@ -81,11 +84,11 @@ void	*routine(void *arg)
 			pthread_mutex_unlock(&philosophers->mutex);
 			printf("Time: %lu, Number %d is eating\n", time_milliseconds(philo->start_time), philosophers->id);
 			usleep(philo->time_to_eat * 1000);
+			pthread_mutex_unlock(&philo->forks[left_fork]);
+			pthread_mutex_unlock(&philo->forks[right_fork]);
 			pthread_mutex_lock(&philosophers->mutex);
 			philosophers->last_meal = time_milliseconds(philo->start_time); // Update last meal time
 			pthread_mutex_unlock(&philosophers->mutex);
-			pthread_mutex_unlock(&philo->forks[left_fork]);
-			pthread_mutex_unlock(&philo->forks[right_fork]);
 		}
 		if (philosophers->times_slept < philosophers->times_ate || philosophers->times_slept < philosophers->times_thought)
 		{
