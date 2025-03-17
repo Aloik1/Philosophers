@@ -6,11 +6,21 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/17 20:19:35 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/03/17 22:05:26 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+int	malloc_failed(void *ptr)
+{
+	if (!ptr)
+	{
+		printf("Error: Malloc failed\n");
+		return (1);
+	}
+	return (0);
+}
 
 size_t time_milliseconds(size_t start_time)
 {
@@ -19,7 +29,15 @@ size_t time_milliseconds(size_t start_time)
     return ((tv.tv_sec * 1000 + tv.tv_usec / 1000) - start_time);
 }
 
-void   *monitor_death(void *arg)
+static int	death_or_not(t_philo *philo, int i)
+{
+	if (philo->number_of_times_each_philosopher_must_eat != -1 && philo->philosophers[i].times_ate >= philo->number_of_times_each_philosopher_must_eat)
+		return (0);
+	else
+		return (1);
+}
+
+static void   *monitor_death(void *arg)
 {
 	int i;
 	t_philo *philo;
@@ -33,11 +51,7 @@ void   *monitor_death(void *arg)
 			pthread_mutex_lock(&philo->philosophers[i].mutex);
 			if (time_milliseconds(philo->start_time) - philo->philosophers[i].last_meal > philo->time_to_die)
 			{
-				if (philo->number_of_times_each_philosopher_must_eat != -1 && philo->philosophers[i].times_ate >= philo->number_of_times_each_philosopher_must_eat)
-				{
-					continue ;
-				}
-				else
+				if (death_or_not(philo, i))
 				{
 					printf("Time: %zu, Number %d died\n", time_milliseconds(philo->start_time), philo->philosophers[i].id);
 					pthread_mutex_unlock(&philo->philosophers[i].mutex);
@@ -50,6 +64,7 @@ void   *monitor_death(void *arg)
 	}
 	return NULL;
 }
+
 
 void	*routine(void *arg)
 {
@@ -114,23 +129,11 @@ void	*routine(void *arg)
 	return NULL;
 }
 
-
-int	main(int argc, char **argv)
+t_philo		*init_philo(t_philo *philo, int argc, char **argv)
 {
-	t_philo	*philo;
-	int	i;
-
-	if (argc != 5 && argc != 6) // 6th argument is optional
-	{
-		printf("Error: Wrong number of arguments\n");
-		return (1);
-	}
 	philo = (t_philo *)malloc(sizeof(t_philo)); // Allocate memory and init philo struct
-	if (!philo)
-	{
-		printf("Error: Malloc failed\n");
-		return (1);
-	}
+	if (malloc_failed(philo))
+		return (NULL);
 	philo->number_of_philosophers = (size_t)atoi(argv[1]);
 	philo->time_to_die = (size_t)atoi(argv[2]);
 	philo->time_to_eat = (size_t)atoi(argv[3]);
@@ -140,20 +143,28 @@ int	main(int argc, char **argv)
 		philo->number_of_times_each_philosopher_must_eat = (size_t)atoi(argv[5]);
 	else
 		philo->number_of_times_each_philosopher_must_eat = -1;
-	philo->philosophers = (t_philosophers *)malloc(sizeof(t_philosophers) * philo->number_of_philosophers);
-	if (!philo->philosophers)
-	{
-		printf("Error: Malloc failed\n");
-		return (1);
-	}
-	// Allocate memory for forks (mutex)
 	philo->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * philo->number_of_philosophers);
-	if (!philo->forks)
+	if (malloc_failed(philo->forks))
+		return (NULL);
+	philo->philosophers = (t_philosophers *)malloc(sizeof(t_philosophers) * philo->number_of_philosophers);
+	if (malloc_failed(philo->philosophers))
+		return (NULL);
+	return (philo);
+}
+int	main(int argc, char **argv)
+{
+	t_philo	*philo;
+	int	i;
+
+	philo = NULL;
+	if (argc != 5 && argc != 6) // 6th argument is optional
 	{
-		printf("Error: Malloc failed\n");
+		printf("Error: Wrong number of arguments\n");
 		return (1);
 	}
-	// Fill the forks array with mutexes and create threads
+	philo = init_philo(philo, argc, argv);
+	if (!philo)
+		return (1);
 	i = 0;
 	while (i < philo->number_of_philosophers)
 	{
