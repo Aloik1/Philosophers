@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/17 15:25:24 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/03/17 16:06:02 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ void	*routine(void *arg)
 	right_fork = philosophers->id % philo->number_of_philosophers;
 	while (1)
 	{
-		// Thinking
 		if ((philosophers->times_ate == philosophers->times_thought) && (philosophers->times_ate == philosophers->times_slept))
 		{
 			if (left_fork < right_fork)
@@ -76,32 +75,33 @@ void	*routine(void *arg)
 				pthread_mutex_lock(&philo->forks[right_fork]);
 				pthread_mutex_lock(&philo->forks[left_fork]);
 			}
-				// Eating
 			pthread_mutex_lock(&philosophers->mutex);
 			philosophers->last_meal = time_milliseconds(philo->start_time); // Update last meal time
 			philosophers->times_ate++;
 			pthread_mutex_unlock(&philosophers->mutex);
 			printf("Time: %lu, Number %d is eating\n", time_milliseconds(philo->start_time), philosophers->id);
 			usleep(philo->time_to_eat * 1000);
+			pthread_mutex_lock(&philosophers->mutex);
+			philosophers->last_meal = time_milliseconds(philo->start_time); // Update last meal time
+			pthread_mutex_unlock(&philosophers->mutex);
 			pthread_mutex_unlock(&philo->forks[left_fork]);
 			pthread_mutex_unlock(&philo->forks[right_fork]);
 		}
-		// Eating
-		if (philosophers->times_thought < philosophers->times_ate || philosophers->times_thought < philosophers->times_slept)
-		{
-			printf("Time: %lu, Number %d is thinking\n", time_milliseconds(philo->start_time), philosophers->id);
-			pthread_mutex_lock(&philosophers->mutex);
-			philosophers->times_thought++;
-			pthread_mutex_unlock(&philosophers->mutex);
-			usleep(200);
-		}
-		if (philosophers->times_slept < philosophers->times_ate && philosophers->times_slept < philosophers->times_thought)
+		if (philosophers->times_slept < philosophers->times_ate || philosophers->times_slept < philosophers->times_thought)
 		{
 			pthread_mutex_lock(&philosophers->mutex);
 			philosophers->times_slept++;
 			pthread_mutex_unlock(&philosophers->mutex);
 			printf("Time: %lu, Number %d is sleeping\n", time_milliseconds(philo->start_time), philosophers->id);
 			usleep(philo->time_to_sleep * 1000);
+		}
+		if (philosophers->times_thought < philosophers->times_ate && philosophers->times_thought < philosophers->times_slept)
+		{
+			printf("Time: %lu, Number %d is thinking\n", time_milliseconds(philo->start_time), philosophers->id);
+			pthread_mutex_lock(&philosophers->mutex);
+			philosophers->times_thought++;
+			pthread_mutex_unlock(&philosophers->mutex);
+			usleep(200);
 		}
 		if (philo->number_of_times_each_philosopher_must_eat != -1 && philosophers->times_ate >= philo->number_of_times_each_philosopher_must_eat)
 		{
