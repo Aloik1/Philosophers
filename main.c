@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/17 20:09:28 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/03/17 20:19:35 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ void   *monitor_death(void *arg)
 			{
 				if (philo->number_of_times_each_philosopher_must_eat != -1 && philo->philosophers[i].times_ate >= philo->number_of_times_each_philosopher_must_eat)
 				{
-					i++;
 					continue ;
 				}
 				else
@@ -104,7 +103,7 @@ void	*routine(void *arg)
 			pthread_mutex_lock(&philosophers->mutex);
 			philosophers->times_thought++;
 			pthread_mutex_unlock(&philosophers->mutex);
-			usleep(200);
+			usleep(500);
 		}
 		if (philo->number_of_times_each_philosopher_must_eat != -1 && philosophers->times_ate >= philo->number_of_times_each_philosopher_must_eat)
 		{
