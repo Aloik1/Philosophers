@@ -5,7 +5,7 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror -pthread
 
 # Source files
-SRCS = main.c
+SRCS = 	main.c		main_process.c		utils.c		routine.c
 
 # Object files
 OBJS = $(SRCS:.c=.o)

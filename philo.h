@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:55 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/17 15:34:34 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/03/17 23:06:43 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,5 +44,15 @@ typedef struct s_philo
 	int				number_of_times_each_philosopher_must_eat;
 	int				number_of_philosophers;
 }	t_philo;
+
+// Main functions
+void	*monitor_death(void *arg);
+void	*routine(void *arg);
+t_philo	*main_process(t_philo *philo);
+
+// Utils
+int		malloc_failed(void *ptr);
+void	death_or_not(t_philo *philo, int i);
+size_t	time_milliseconds(size_t start_time);
 
 #endif
