@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/17 22:05:26 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/03/17 22:08:00 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,20 +151,11 @@ t_philo		*init_philo(t_philo *philo, int argc, char **argv)
 		return (NULL);
 	return (philo);
 }
-int	main(int argc, char **argv)
-{
-	t_philo	*philo;
-	int	i;
 
-	philo = NULL;
-	if (argc != 5 && argc != 6) // 6th argument is optional
-	{
-		printf("Error: Wrong number of arguments\n");
-		return (1);
-	}
-	philo = init_philo(philo, argc, argv);
-	if (!philo)
-		return (1);
+void	main_process(t_philo *philo)
+{
+	int	i;
+	
 	i = 0;
 	while (i < philo->number_of_philosophers)
 	{
@@ -185,14 +176,14 @@ int	main(int argc, char **argv)
 		if (pthread_create(&philo->philosophers[i].thread, NULL, &routine, &philo->philosophers[i]))
 		{
 			printf("Error: pthread_create failed\n");
-			return (1);
+			return ;
 		}
 		i++;
 	}
 	if (pthread_create(&philo->monitor_death, NULL, &monitor_death, philo))
 	{
 		printf("Error: pthread_create failed\n");
-		return (1);
+		return ;
 	}
 	i = 0;
 	while (i < philo->number_of_philosophers)
@@ -200,6 +191,58 @@ int	main(int argc, char **argv)
 		pthread_join(philo->philosophers[i].thread, NULL);
 		i++;
 	}
+}
+
+int	main(int argc, char **argv)
+{
+	t_philo	*philo;
+	int		i;
+
+	philo = NULL;
+	if (argc != 5 && argc != 6) // 6th argument is optional
+	{
+		printf("Error: Wrong number of arguments\n");
+		return (1);
+	}
+	philo = init_philo(philo, argc, argv);
+	if (!philo)
+		return (1);
+	main_process(philo);
+	// i = 0;
+	// while (i < philo->number_of_philosophers)
+	// {
+	// 	philo->philosophers[i].id = i + 1;
+	// 	philo->philosophers[i].last_meal = time_milliseconds(philo->start_time);
+	// 	philo->philosophers[i].shared_philo = philo;
+	// 	philo->philosophers[i].times_ate = 0;
+	// 	philo->philosophers[i].times_slept = 0;
+	// 	philo->philosophers[i].times_thought = 0;
+		
+	// 	pthread_mutex_init(&philo->forks[i], NULL);
+	// 	pthread_mutex_init(&philo->philosophers[i].mutex, NULL);
+	// 	i++;
+	// }
+	// i = 0;
+	// while (i < philo->number_of_philosophers)
+	// {
+	// 	if (pthread_create(&philo->philosophers[i].thread, NULL, &routine, &philo->philosophers[i]))
+	// 	{
+	// 		printf("Error: pthread_create failed\n");
+	// 		return (1);
+	// 	}
+	// 	i++;
+	// }
+	// if (pthread_create(&philo->monitor_death, NULL, &monitor_death, philo))
+	// {
+	// 	printf("Error: pthread_create failed\n");
+	// 	return (1);
+	// }
+	// i = 0;
+	// while (i < philo->number_of_philosophers)
+	// {
+	// 	pthread_join(philo->philosophers[i].thread, NULL);
+	// 	i++;
+	// }
 	// Free memory
 	i = 0;
 	while (i < philo->number_of_philosophers)
