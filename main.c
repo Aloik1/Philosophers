@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/17 23:04:23 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/03/19 19:06:11 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ static t_philo	*init_philo(t_philo *philo, int argc, char **argv)
 	philo->time_to_die = (size_t)atoi(argv[2]);
 	philo->time_to_eat = (size_t)atoi(argv[3]);
 	philo->time_to_sleep = (size_t)atoi(argv[4]);
+	philo->simulation_finished = 0;
 	philo->start_time = time_milliseconds(0);
 	if (argc == 6)
 		philo->number_of_times_each_philosopher_must_eat
@@ -39,6 +40,25 @@ static t_philo	*init_philo(t_philo *philo, int argc, char **argv)
 	return (philo);
 }
 
+// static int	check_dead_or_finished_eating(t_philo *philo, int i)
+// {
+// 	if (time_milliseconds(philo->start_time)
+// 		- philo->philosophers[i].last_meal
+// 		> philo->time_to_die)
+// 	{
+// 		if (death_or_not(philo, i))
+// 			return (0);
+// 	}
+// 	if (philo->number_of_times_each_philosopher_must_eat != -1
+// 		&& philo->philosophers[i].times_ate
+// 		>= philo->number_of_times_each_philosopher_must_eat)
+// 	{
+// 		pthread_mutex_unlock(&philo->philosophers[i].mutex);
+// 		return (0);
+// 	}
+// 	return (1);
+// }
+
 void	*monitor_death(void *arg)
 {
 	t_philo	*philo;
@@ -51,10 +71,24 @@ void	*monitor_death(void *arg)
 		while (i < philo->number_of_philosophers)
 		{
 			pthread_mutex_lock(&philo->philosophers[i].mutex);
+			// if (!check_dead_or_finished_eating(philo, i))
+			// 	return (NULL);
 			if (time_milliseconds(philo->start_time)
 				- philo->philosophers[i].last_meal
 				> philo->time_to_die)
-				death_or_not(philo, i);
+			{
+				// pthread_mutex_unlock(&philo->philosophers[i].mutex);
+				printf("Exceeded time_to_die\n");
+				if (death_or_not(philo, i) == 1)
+					free_everything_and_exit(philo);
+			}
+			if (philo->number_of_times_each_philosopher_must_eat != -1
+				&& philo->philosophers[i].times_ate
+				>= philo->number_of_times_each_philosopher_must_eat)
+			{
+				pthread_mutex_unlock(&philo->philosophers[i].mutex);
+				return (NULL);
+			}
 			pthread_mutex_unlock(&philo->philosophers[i].mutex);
 			i++;
 		}

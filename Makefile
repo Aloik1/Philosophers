@@ -2,7 +2,7 @@
 CC = cc
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -Werror -pthread
+CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=address -g
 
 # Source files
 SRCS = 	main.c		main_process.c		utils.c		routine.c

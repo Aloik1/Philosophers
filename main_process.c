@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 22:12:03 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/17 23:12:03 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/03/19 17:48:59 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,11 @@ static t_philo	*create_threads(t_philo *philo)
 		}
 		i++;
 	}
+	if (pthread_create(&philo->monitor_death, NULL, &monitor_death, philo))
+	{
+		printf("Error: pthread_create failed\n");
+		return (philo);
+	}
 	return (philo);
 }
 
@@ -62,16 +67,12 @@ t_philo	*main_process(t_philo *philo)
 
 	philo = init_mutex(philo);
 	philo = create_threads(philo);
-	if (pthread_create(&philo->monitor_death, NULL, &monitor_death, philo))
-	{
-		printf("Error: pthread_create failed\n");
-		return (philo);
-	}
 	i = 0;
 	while (i < philo->number_of_philosophers)
 	{
 		pthread_join(philo->philosophers[i].thread, NULL);
 		i++;
 	}
+	pthread_join(philo->monitor_death, NULL);
 	return (philo);
 }
