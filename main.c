@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/19 19:06:11 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/04/23 18:09:25 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,10 @@ void	*monitor_death(void *arg)
 				// pthread_mutex_unlock(&philo->philosophers[i].mutex);
 				printf("Exceeded time_to_die\n");
 				if (death_or_not(philo, i) == 1)
+				{
+					pthread_mutex_unlock(&philo->philosophers[i].mutex);
 					free_everything_and_exit(philo);
+				}
 			}
 			if (philo->number_of_times_each_philosopher_must_eat != -1
 				&& philo->philosophers[i].times_ate
