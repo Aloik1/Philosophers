@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/05/04 18:31:37 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/05/04 19:25:32 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,25 +40,6 @@ static t_philo	*init_philo(t_philo *philo, int argc, char **argv)
 	philo->all_have_eaten = 0;
 	return (philo);
 }
-
-// static int	check_dead_or_finished_eating(t_philo *philo, int i)
-// {
-// 	if (time_milliseconds(philo->start_time)
-// 		- philo->philosophers[i].last_meal
-// 		> philo->time_to_die)
-// 	{
-// 		if (death_or_not(philo, i))
-// 			return (0);
-// 	}
-// 	if (philo->number_of_times_each_philosopher_must_eat != -1
-// 		&& philo->philosophers[i].times_ate
-// 		>= philo->number_of_times_each_philosopher_must_eat)
-// 	{
-// 		pthread_mutex_unlock(&philo->philosophers[i].mutex);
-// 		return (0);
-// 	}
-// 	return (1);
-// }
 
 int	check_all_ate(t_philo *philo)
 {
@@ -135,11 +116,8 @@ int	main(int argc, char **argv)
 	int		i;
 
 	philo = NULL;
-	if (argc != 5 && argc != 6)
-	{
-		printf("Error: Wrong number of arguments\n");
+	if (!initial_checks(argc, argv))
 		return (1);
-	}
 	philo = init_philo(philo, argc, argv);
 	if (!philo)
 		return (1);

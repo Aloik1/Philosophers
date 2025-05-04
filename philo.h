@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:55 by aloiki            #+#    #+#             */
-/*   Updated: 2025/05/04 19:18:29 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/05/04 19:22:33 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <string.h>   // For memset
 # include <sys/time.h> // For gettimeofday
 # include <unistd.h>   // For write, usleep
+# include <limits.h>   // For INT_MAX
 
 typedef struct s_philosophers
 {
@@ -60,7 +61,6 @@ int					malloc_failed(void *ptr);
 int					check_dead(t_philo *philo);
 int					check_all_ate(t_philo *philo);
 size_t				time_milliseconds(size_t start_time);
-void				free_everything_and_exit(t_philo *philo);
 int					check_stop(t_philo *philo);
 void				left_right(t_philo *philo, t_philosophers *philosophers,
 						size_t left_fork, size_t right_fork);
@@ -68,5 +68,7 @@ void				right_left(t_philo *philo, t_philosophers *philosophers,
 						size_t left_fork, size_t right_fork);
 void				eating(t_philo *philo, t_philosophers *philosophers,
 						size_t left_fork, size_t right_fork);
+int					is_positive_integer(const char *str);
+int					initial_checks(int argc, char **argv);
 
 #endif
