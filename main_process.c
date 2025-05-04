@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 22:12:03 by aloiki            #+#    #+#             */
-/*   Updated: 2025/03/19 17:48:59 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/05/04 15:23:09 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,9 +55,12 @@ static t_philo	*init_mutex(t_philo *philo)
 	{
 		philo = init_philosophers(philo, i);
 		pthread_mutex_init(&philo->forks[i], NULL);
-		pthread_mutex_init(&philo->philosophers[i].mutex, NULL);
 		i++;
 	}
+	pthread_mutex_init(&philo->philosophers->mutex, NULL);
+	pthread_mutex_init(&philo->philosophers->meal_counter_mutex, NULL);
+	pthread_mutex_init(&philo->philosophers->check_end_mutex, NULL);
+	pthread_mutex_init(&philo->philosophers->print_mutex, NULL);
 	return (philo);
 }
 
