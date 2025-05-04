@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 22:36:40 by aloiki            #+#    #+#             */
-/*   Updated: 2025/05/04 16:21:28 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/05/04 16:27:37 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ static void	eating(t_philo *philo, t_philosophers *philosophers,
 		printf("Time: %lu, Number %d has taken left fork\n",
 			time_milliseconds(philo->start_time), philosophers->id);
 	}
-	if (!check_stop(philo))
+	if (check_stop(philo))
 	{
 		pthread_mutex_unlock(&philo->forks[left_fork]);
 		pthread_mutex_unlock(&philo->forks[right_fork]);
