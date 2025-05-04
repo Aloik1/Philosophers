@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 22:36:40 by aloiki            #+#    #+#             */
-/*   Updated: 2025/05/04 16:27:37 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/05/04 17:37:49 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,21 +27,29 @@ static void	eating(t_philo *philo, t_philosophers *philosophers,
 {
 	if (left_fork < right_fork)
 	{
+		if (check_stop(philo))
+			return ;
 		pthread_mutex_lock(&philo->forks[left_fork]);
-		printf("Time: %lu, Number %d has taken left fork\n",
-			time_milliseconds(philo->start_time), philosophers->id);
+		if (!philo->check_end)
+			printf("Time: %lu, Number %d has taken left fork\n",
+				time_milliseconds(philo->start_time), philosophers->id);
 		pthread_mutex_lock(&philo->forks[right_fork]);
-		printf("Time: %lu, Number %d has taken right fork\n",
-			time_milliseconds(philo->start_time), philosophers->id);
+		if (!philo->check_end)
+			printf("Time: %lu, Number %d has taken right fork\n",
+				time_milliseconds(philo->start_time), philosophers->id);
 	}
 	else
 	{
+		if (check_stop(philo))
+			return ;
 		pthread_mutex_lock(&philo->forks[right_fork]);
-		printf("Time: %lu, Number %d has taken right fork\n",
-			time_milliseconds(philo->start_time), philosophers->id);
+		if (!philo->check_end)
+			printf("Time: %lu, Number %d has taken right fork\n",
+				time_milliseconds(philo->start_time), philosophers->id);
 		pthread_mutex_lock(&philo->forks[left_fork]);
-		printf("Time: %lu, Number %d has taken left fork\n",
-			time_milliseconds(philo->start_time), philosophers->id);
+		if (!philo->check_end)
+			printf("Time: %lu, Number %d has taken left fork\n",
+				time_milliseconds(philo->start_time), philosophers->id);
 	}
 	if (check_stop(philo))
 	{
@@ -75,8 +83,8 @@ static void	eating(t_philo *philo, t_philosophers *philosophers,
 static int	conditions(t_philo *philo, t_philosophers *philosophers,
 		size_t left_fork, size_t right_fork)
 {
-	//pthread_mutex_lock(&philosophers->mutex);
-	
+	if (check_stop(philo))
+		return (1);
 	if ((philosophers->times_ate == philosophers->times_thought)
 		&& (philosophers->times_ate == philosophers->times_slept))
 	{
@@ -119,6 +127,14 @@ void	*routine(void *arg)
 	philo = philosophers->shared_philo;
 	left_fork = philosophers->id - 1;
 	right_fork = philosophers->id % philo->number_of_philosophers;
+	if (philo->number_of_philosophers == 1)
+	{
+		if (check_stop(philo))
+			return (NULL);
+		printf("Time: %lu, Number %d has taken left fork\n",
+			time_milliseconds(philo->start_time), philosophers->id);
+		usleep(philo->time_to_die * 1000);
+	}
 	while (!check_stop(philo))
 	{
 		conditions(philo, philosophers, left_fork, right_fork);
