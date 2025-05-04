@@ -5,7 +5,7 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread -g
 
 # Source files
-SRCS = 	main.c		main_process.c		utils.c		routine.c
+SRCS = 	main.c		main_process.c		utils.c		routine.c		eating.c
 
 # Object files
 OBJS = $(SRCS:.c=.o)
