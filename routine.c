@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 22:36:40 by aloiki            #+#    #+#             */
-/*   Updated: 2025/05/04 17:37:49 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/05/04 18:31:30 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,27 +30,34 @@ static void	eating(t_philo *philo, t_philosophers *philosophers,
 		if (check_stop(philo))
 			return ;
 		pthread_mutex_lock(&philo->forks[left_fork]);
+		pthread_mutex_lock(&philo->philosophers->check_end_mutex);
 		if (!philo->check_end)
 			printf("Time: %lu, Number %d has taken left fork\n",
 				time_milliseconds(philo->start_time), philosophers->id);
+		pthread_mutex_unlock(&philo->philosophers->check_end_mutex);
 		pthread_mutex_lock(&philo->forks[right_fork]);
+		pthread_mutex_lock(&philo->philosophers->check_end_mutex);
 		if (!philo->check_end)
 			printf("Time: %lu, Number %d has taken right fork\n",
 				time_milliseconds(philo->start_time), philosophers->id);
+		pthread_mutex_unlock(&philo->philosophers->check_end_mutex);
 	}
 	else
 	{
 		if (check_stop(philo))
 			return ;
 		pthread_mutex_lock(&philo->forks[right_fork]);
+		pthread_mutex_lock(&philo->philosophers->check_end_mutex);		
 		if (!philo->check_end)
 			printf("Time: %lu, Number %d has taken right fork\n",
 				time_milliseconds(philo->start_time), philosophers->id);
+		pthread_mutex_unlock(&philo->philosophers->check_end_mutex);
 		pthread_mutex_lock(&philo->forks[left_fork]);
+		pthread_mutex_lock(&philo->philosophers->check_end_mutex);
 		if (!philo->check_end)
 			printf("Time: %lu, Number %d has taken left fork\n",
 				time_milliseconds(philo->start_time), philosophers->id);
-	}
+		pthread_mutex_unlock(&philo->philosophers->check_end_mutex);}
 	if (check_stop(philo))
 	{
 		pthread_mutex_unlock(&philo->forks[left_fork]);
@@ -64,9 +71,9 @@ static void	eating(t_philo *philo, t_philosophers *philosophers,
 	if (philo->number_of_times_each_philosopher_must_eat != -1
 		&& philosophers->times_ate == philo->number_of_times_each_philosopher_must_eat)
 	{
-		pthread_mutex_lock(&philosophers->meal_counter_mutex);
+		pthread_mutex_lock(&philo->philosophers->meal_counter_mutex);
 		philo->all_have_eaten++;
-		pthread_mutex_unlock(&philosophers->meal_counter_mutex);
+		pthread_mutex_unlock(&philo->philosophers->meal_counter_mutex);
 	}
 	pthread_mutex_lock(&philosophers->print_mutex);
 	printf("Time: %lu, Number %d is eating\n",
@@ -75,9 +82,6 @@ static void	eating(t_philo *philo, t_philosophers *philosophers,
 	usleep(philo->time_to_eat * 1000);
 	pthread_mutex_unlock(&philo->forks[left_fork]);
 	pthread_mutex_unlock(&philo->forks[right_fork]);
-	pthread_mutex_lock(&philosophers->mutex);
-	philosophers->last_meal = time_milliseconds(philo->start_time);
-	pthread_mutex_unlock(&philosophers->mutex);
 }
 
 static int	conditions(t_philo *philo, t_philosophers *philosophers,
@@ -97,16 +101,18 @@ static int	conditions(t_philo *philo, t_philosophers *philosophers,
 		pthread_mutex_lock(&philosophers->mutex);
 		philosophers->times_slept++;
 		pthread_mutex_unlock(&philosophers->mutex);
-		printf("Time: %lu, Number %d is sleeping\n",
-			time_milliseconds(philo->start_time), philosophers->id);
+		if (!check_stop(philo))
+			printf("Time: %lu, Number %d is sleeping\n",
+				time_milliseconds(philo->start_time), philosophers->id);
 		usleep(philo->time_to_sleep * 1000);
 		return (1);
 	}
 	if (philosophers->times_thought < philosophers->times_ate
 		&& philosophers->times_thought < philosophers->times_slept)
 	{
-		printf("Time: %lu, Number %d is thinking\n",
-			time_milliseconds(philo->start_time), philosophers->id);
+		if (!check_stop(philo))
+			printf("Time: %lu, Number %d is thinking\n",
+				time_milliseconds(philo->start_time), philosophers->id);
 		pthread_mutex_lock(&philosophers->mutex);
 		philosophers->times_thought++;
 		pthread_mutex_unlock(&philosophers->mutex);

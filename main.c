@@ -6,7 +6,7 @@
 /*   By: aloiki <aloiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/16 10:35:15 by aloiki            #+#    #+#             */
-/*   Updated: 2025/05/04 16:23:19 by aloiki           ###   ########.fr       */
+/*   Updated: 2025/05/04 18:31:37 by aloiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,9 @@ int	check_all_ate(t_philo *philo)
 		pthread_mutex_lock(&philo->philosophers->print_mutex);
 		printf("All philosophers have eaten %d times\n",
 			philo->number_of_times_each_philosopher_must_eat);
+		pthread_mutex_lock(&philo->philosophers->check_end_mutex);
 		philo->check_end = 1;
+		pthread_mutex_unlock(&philo->philosophers->check_end_mutex);
 		pthread_mutex_unlock(&philo->philosophers->print_mutex);
 		pthread_mutex_unlock(&philo->philosophers->meal_counter_mutex);
 		return (1);
@@ -85,7 +87,7 @@ int	check_dead(t_philo *philo)
 	i = 0;
 	while (i < philo->number_of_philosophers)
 	{
-		pthread_mutex_lock(&philo->philosophers->mutex);
+		pthread_mutex_lock(&philo->philosophers[i].mutex);
 		if (time_milliseconds(philo->start_time)
 			- philo->philosophers[i].last_meal
 			> philo->time_to_die)
@@ -94,12 +96,14 @@ int	check_dead(t_philo *philo)
 			printf("Time: %zu, Number %d died\n",
 				time_milliseconds(philo->start_time),
 				philo->philosophers[i].id);
+			pthread_mutex_lock(&philo->philosophers->check_end_mutex);
 			philo->check_end = 1;
+			pthread_mutex_unlock(&philo->philosophers->check_end_mutex);
 			pthread_mutex_unlock(&philo->philosophers->print_mutex);
-			pthread_mutex_unlock(&philo->philosophers->mutex);
+			pthread_mutex_unlock(&philo->philosophers[i].mutex);
 			return (1);
 		}
-		pthread_mutex_unlock(&philo->philosophers->mutex);
+		pthread_mutex_unlock(&philo->philosophers[i].mutex);
 		i++;
 	}
 	return (0);
